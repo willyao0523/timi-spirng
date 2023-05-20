@@ -4,24 +4,43 @@ import org.buildyourown.timispring.beans.*;
 import org.buildyourown.timispring.core.ClassPathXmlResource;
 import org.buildyourown.timispring.core.Resource;
 
-public class ClassPathXmlApplicationContext implements BeanFactory {
-    BeanFactory beanFactory;
-
-    public ClassPathXmlApplicationContext(String filename) {
-        Resource resource = new ClassPathXmlResource(filename);
-        BeanFactory beanFactory = new SimpleBeanFactory();
-        XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
-        reader.loadBeanDefinitions(resource);
-        this.beanFactory = beanFactory;
+public class ClassPathXmlApplicationContext implements BeanFactory, ApplicationEventPublisher {
+    SimpleBeanFactory beanFactory;
+    public ClassPathXmlApplicationContext(String fileName){
+        Resource res = new ClassPathXmlResource(fileName);
+        SimpleBeanFactory bf = new SimpleBeanFactory();
+        XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(bf);
+        reader.loadBeanDefinitions(res);
+        this.beanFactory = bf;
     }
 
     @Override
-    public Object getBean(String beanName) throws NoSuchBeanDefinitionException {
+    public Object getBean(String beanName) throws BeansException {
         return this.beanFactory.getBean(beanName);
     }
 
     @Override
-    public void registerBeanDefinition(BeanDefinition beanDefinition) {
-        this.beanFactory.registerBeanDefinition(beanDefinition);
+    public boolean containsBean(String name) {
+        return this.beanFactory.containsBean(name);
+    }
+
+    public void registerBean(String beanName, Object obj) {
+        this.beanFactory.registerBean(beanName, obj);
+    }
+
+    public void publishEvent(ApplicationEvent event) {
+
+    }
+
+    public boolean isSingleton(String name) {
+        return false;
+    }
+
+    public boolean isPrototype(String name) {
+        return false;
+    }
+
+    public Class<?> getType(String name) {
+        return null;
     }
 }
