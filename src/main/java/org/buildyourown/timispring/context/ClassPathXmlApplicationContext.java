@@ -1,11 +1,20 @@
 package org.buildyourown.timispring.context;
 
 import org.buildyourown.timispring.beans.*;
+import org.buildyourown.timispring.beans.factory.BeanFactory;
+import org.buildyourown.timispring.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
+import org.buildyourown.timispring.beans.factory.config.AutowireCapableBeanFactory;
+import org.buildyourown.timispring.beans.factory.config.BeanFactoryPostProcessor;
+import org.buildyourown.timispring.beans.factory.xml.XmlBeanDefinitionReader;
 import org.buildyourown.timispring.core.ClassPathXmlResource;
 import org.buildyourown.timispring.core.Resource;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ClassPathXmlApplicationContext implements BeanFactory, ApplicationEventPublisher {
-    SimpleBeanFactory beanFactory;
+    AutowireCapableBeanFactory beanFactory;
+    private final List<BeanFactoryPostProcessor> beanFactoryPostProcessors = new ArrayList<>();
 
     public ClassPathXmlApplicationContext(String filename) {
         this(filename, true);
@@ -13,14 +22,28 @@ public class ClassPathXmlApplicationContext implements BeanFactory, ApplicationE
 
     public ClassPathXmlApplicationContext(String filename, boolean isRefresh) {
         Resource resource = new ClassPathXmlResource(filename);
-        SimpleBeanFactory simpleBeanFactory = new SimpleBeanFactory();
-        XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(simpleBeanFactory);
+        AutowireCapableBeanFactory beanFactory = new AutowireCapableBeanFactory();
+        XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
         reader.loadBeanDefinitions(resource);
-        this.beanFactory = simpleBeanFactory;
+        this.beanFactory = beanFactory;
 
         if (isRefresh) {
-            this.beanFactory.refresh();
+            refresh();
         }
+    }
+
+    public void refresh() {
+        registerBeanPostProcessor(this.beanFactory);
+
+        onRefresh();
+    }
+
+    private void registerBeanPostProcessor(AutowireCapableBeanFactory beanFactory) {
+        beanFactory.addBeanPostProcessor(new AutowiredAnnotationBeanPostProcessor());
+    }
+
+    private void onRefresh() {
+        this.beanFactory.refresh();
     }
 
     @Override

@@ -1,4 +1,6 @@
-package org.buildyourown.timispring.beans;
+package org.buildyourown.timispring.beans.factory;
+
+import org.buildyourown.timispring.beans.BeansException;
 
 public interface BeanFactory {
 

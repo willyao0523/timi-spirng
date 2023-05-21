@@ -1,4 +1,4 @@
-package org.buildyourown.timispring.beans;
+package org.buildyourown.timispring.beans.factory.config;
 
 public interface SingleBeanRegistry {
 

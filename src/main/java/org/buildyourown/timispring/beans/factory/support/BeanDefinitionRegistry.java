@@ -1,4 +1,6 @@
-package org.buildyourown.timispring.beans;
+package org.buildyourown.timispring.beans.factory.support;
+
+import org.buildyourown.timispring.beans.factory.config.BeanDefinition;
 
 public interface BeanDefinitionRegistry {
     void registerBeanDefinition(String name, BeanDefinition beanDefinition);

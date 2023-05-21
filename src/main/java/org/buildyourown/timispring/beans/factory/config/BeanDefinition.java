@@ -1,4 +1,6 @@
-package org.buildyourown.timispring.beans;
+package org.buildyourown.timispring.beans.factory.config;
+
+import org.buildyourown.timispring.beans.PropertyValues;
 
 public class BeanDefinition {
     String SCOPE_SINGLETON = "singleton";
@@ -6,7 +8,7 @@ public class BeanDefinition {
 
     private boolean lazyInit = true;
     private String[] dependsOn;
-    private ArgumentValues constructorArgumentValues;
+    private ConstructorArgumentValues constructorArgumentValues;
 
     private PropertyValues propertyValues;
     private String initMethodName;
@@ -79,12 +81,12 @@ public class BeanDefinition {
         return this.dependsOn;
     }
 
-    public void setConstructorArgumentValues(ArgumentValues constructorArgumentValues) {
+    public void setConstructorArgumentValues(ConstructorArgumentValues constructorArgumentValues) {
         this.constructorArgumentValues =
-                (constructorArgumentValues != null ? constructorArgumentValues : new ArgumentValues());
+                (constructorArgumentValues != null ? constructorArgumentValues : new ConstructorArgumentValues());
     }
 
-    public ArgumentValues getConstructorArgumentValues() {
+    public ConstructorArgumentValues getConstructorArgumentValues() {
         return this.constructorArgumentValues;
     }
 

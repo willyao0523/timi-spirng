@@ -1,6 +1,9 @@
 package org.buildyourown.timispring.test;
 
+import org.buildyourown.timispring.beans.factory.annotation.Autowired;
+
 public class BaseService {
+    @Autowired
     private BaseBaseService bbs;
 
     public BaseService() {
@@ -17,5 +20,9 @@ public class BaseService {
     public void sayHello() {
         System.out.print("Base Service says hello");
         bbs.sayHello();
+    }
+
+    public void init() {
+        System.out.print("Base Service init method.");
     }
 }
