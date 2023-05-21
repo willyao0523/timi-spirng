@@ -6,12 +6,21 @@ import org.buildyourown.timispring.core.Resource;
 
 public class ClassPathXmlApplicationContext implements BeanFactory, ApplicationEventPublisher {
     SimpleBeanFactory beanFactory;
-    public ClassPathXmlApplicationContext(String fileName){
-        Resource res = new ClassPathXmlResource(fileName);
-        SimpleBeanFactory bf = new SimpleBeanFactory();
-        XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(bf);
-        reader.loadBeanDefinitions(res);
-        this.beanFactory = bf;
+
+    public ClassPathXmlApplicationContext(String filename) {
+        this(filename, true);
+    }
+
+    public ClassPathXmlApplicationContext(String filename, boolean isRefresh) {
+        Resource resource = new ClassPathXmlResource(filename);
+        SimpleBeanFactory simpleBeanFactory = new SimpleBeanFactory();
+        XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(simpleBeanFactory);
+        reader.loadBeanDefinitions(resource);
+        this.beanFactory = simpleBeanFactory;
+
+        if (isRefresh) {
+            this.beanFactory.refresh();
+        }
     }
 
     @Override
