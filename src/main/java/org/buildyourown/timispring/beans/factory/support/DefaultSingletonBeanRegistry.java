@@ -1,11 +1,11 @@
 package org.buildyourown.timispring.beans.factory.support;
 
-import org.buildyourown.timispring.beans.factory.config.SingleBeanRegistry;
+import org.buildyourown.timispring.beans.factory.config.SingletonBeanRegistry;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class DefaultSingletonBeanRegistry implements SingleBeanRegistry {
+public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
     protected List<String> beanNames = new ArrayList<>();
     protected Map<String, Object> singletons = new ConcurrentHashMap<>(256);
     protected Map<String, Set<String>> dependentBeanMap = new ConcurrentHashMap<>(256);
@@ -47,7 +47,7 @@ public class DefaultSingletonBeanRegistry implements SingleBeanRegistry {
         }
     }
 
-    protected void registerDependentBean(String beanName, String dependentBeanName) {
+    public void registerDependentBean(String beanName, String dependentBeanName) {
         Set<String> dependentBeans = this.dependentBeanMap.get(beanName);
         if (dependentBeans != null && dependentBeans.contains(dependentBeanName)) {
             return;
@@ -70,11 +70,11 @@ public class DefaultSingletonBeanRegistry implements SingleBeanRegistry {
         }
     }
 
-    protected boolean hasDependentBean(String beanName) {
+    public boolean hasDependentBean(String beanName) {
         return this.dependenciesForBeanMap.containsKey(beanName);
     }
 
-    protected String[] getDependentBeans(String beanName) {
+    public String[] getDependentBeans(String beanName) {
         Set<String> dependentBeans = this.dependentBeanMap.get(beanName);
         if (dependentBeans == null) {
             return new String[0];
@@ -83,7 +83,7 @@ public class DefaultSingletonBeanRegistry implements SingleBeanRegistry {
 
     }
 
-    protected String[] getDependenciesForBean(String beanName) {
+    public String[] getDependenciesForBean(String beanName) {
         Set<String> dependenciesForBean = this.dependenciesForBeanMap.get(beanName);
         if (dependenciesForBean == null) {
             return new String[0];

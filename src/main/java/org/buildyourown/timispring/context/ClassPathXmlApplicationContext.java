@@ -5,6 +5,8 @@ import org.buildyourown.timispring.beans.factory.BeanFactory;
 import org.buildyourown.timispring.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.buildyourown.timispring.beans.factory.config.AutowireCapableBeanFactory;
 import org.buildyourown.timispring.beans.factory.config.BeanFactoryPostProcessor;
+import org.buildyourown.timispring.beans.factory.config.ConfigurableListableBeanFactory;
+import org.buildyourown.timispring.beans.factory.support.DefaultListableBeanFactory;
 import org.buildyourown.timispring.beans.factory.xml.XmlBeanDefinitionReader;
 import org.buildyourown.timispring.core.ClassPathXmlResource;
 import org.buildyourown.timispring.core.Resource;
@@ -12,8 +14,8 @@ import org.buildyourown.timispring.core.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ClassPathXmlApplicationContext implements BeanFactory, ApplicationEventPublisher {
-    AutowireCapableBeanFactory beanFactory;
+public class ClassPathXmlApplicationContext extends AbstractApplicationContext {
+    DefaultListableBeanFactory beanFactory;
     private final List<BeanFactoryPostProcessor> beanFactoryPostProcessors = new ArrayList<>();
 
     public ClassPathXmlApplicationContext(String filename) {
@@ -22,57 +24,66 @@ public class ClassPathXmlApplicationContext implements BeanFactory, ApplicationE
 
     public ClassPathXmlApplicationContext(String filename, boolean isRefresh) {
         Resource resource = new ClassPathXmlResource(filename);
-        AutowireCapableBeanFactory beanFactory = new AutowireCapableBeanFactory();
+        DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
         XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
         reader.loadBeanDefinitions(resource);
         this.beanFactory = beanFactory;
 
         if (isRefresh) {
-            refresh();
+            try {
+                refresh();
+            } catch (IllegalStateException e) {
+                e.printStackTrace();
+            }
         }
     }
 
-    public void refresh() {
-        registerBeanPostProcessor(this.beanFactory);
-
-        onRefresh();
+    @Override
+    void registerListeners() {
+        ApplicationListener listener = new ApplicationListener();
+        this.getApplicationEventPublisher().addApplicationListener(listener);
     }
 
-    private void registerBeanPostProcessor(AutowireCapableBeanFactory beanFactory) {
-        beanFactory.addBeanPostProcessor(new AutowiredAnnotationBeanPostProcessor());
+    @Override
+    void initApplicationEventPublisher() {
+        ApplicationEventPublisher aep = new SimpleApplicationEventPublisher();
+        this.setApplicationEventPublisher(aep);
     }
 
-    private void onRefresh() {
+    @Override
+    void postProcessBeanFactory(ConfigurableListableBeanFactory bf) {
+    }
+
+    @Override
+    void registerBeanPostProcessors(ConfigurableListableBeanFactory bf) {
+        this.beanFactory.addBeanPostProcessor(new AutowiredAnnotationBeanPostProcessor());
+    }
+
+    @Override
+    void onRefresh() {
         this.beanFactory.refresh();
     }
 
     @Override
-    public Object getBean(String beanName) throws BeansException {
-        return this.beanFactory.getBean(beanName);
+    public ConfigurableListableBeanFactory getBeanFactory() throws IllegalStateException {
+        return this.beanFactory;
     }
 
     @Override
-    public boolean containsBean(String name) {
-        return this.beanFactory.containsBean(name);
+    public void addApplicationListener(ApplicationListener listener) {
+        this.getApplicationEventPublisher().addApplicationListener(listener);
+
     }
 
-    public void registerBean(String beanName, Object obj) {
-        this.beanFactory.registerBean(beanName, obj);
+    @Override
+    void finishRefresh() {
+        publishEvent(new ContextRefreshEvent("Context Refreshed..."));
+
     }
 
+    @Override
     public void publishEvent(ApplicationEvent event) {
+        this.getApplicationEventPublisher().publishEvent(event);
 
-    }
-
-    public boolean isSingleton(String name) {
-        return false;
-    }
-
-    public boolean isPrototype(String name) {
-        return false;
-    }
-
-    public Class<?> getType(String name) {
-        return null;
     }
 }

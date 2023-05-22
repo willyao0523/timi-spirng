@@ -5,6 +5,7 @@ import org.buildyourown.timispring.beans.factory.config.AutowireCapableBeanFacto
 import org.buildyourown.timispring.beans.factory.config.BeanDefinition;
 import org.buildyourown.timispring.beans.factory.config.ConstructorArgumentValue;
 import org.buildyourown.timispring.beans.factory.config.ConstructorArgumentValues;
+import org.buildyourown.timispring.beans.factory.support.AbstractBeanFactory;
 import org.buildyourown.timispring.core.Resource;
 import org.dom4j.Element;
 
@@ -14,9 +15,9 @@ import java.util.List;
 
 public class XmlBeanDefinitionReader {
 
-    AutowireCapableBeanFactory beanFactory;
+    AbstractBeanFactory beanFactory;
 
-    public XmlBeanDefinitionReader(AutowireCapableBeanFactory beanFactory) {
+    public XmlBeanDefinitionReader(AbstractBeanFactory beanFactory) {
         this.beanFactory = beanFactory;
     }
 

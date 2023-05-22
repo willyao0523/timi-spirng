@@ -1,13 +1,14 @@
 package org.buildyourown.timispring.beans.factory.annotation;
 
 import org.buildyourown.timispring.beans.BeansException;
+import org.buildyourown.timispring.beans.factory.BeanFactory;
 import org.buildyourown.timispring.beans.factory.config.AutowireCapableBeanFactory;
 import org.buildyourown.timispring.beans.factory.config.BeanPostProcessor;
 
 import java.lang.reflect.Field;
 
 public class AutowiredAnnotationBeanPostProcessor implements BeanPostProcessor {
-    private AutowireCapableBeanFactory beanFactory;
+    private BeanFactory beanFactory;
 
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
@@ -37,11 +38,13 @@ public class AutowiredAnnotationBeanPostProcessor implements BeanPostProcessor {
         return null;
     }
 
-    public AutowireCapableBeanFactory getBeanFactory() {
+    @Override
+    public void setBeanFactory(BeanFactory beanFactory) {
+        this.beanFactory = beanFactory;
+    }
+
+    public BeanFactory getBeanFactory() {
         return beanFactory;
     }
 
-    public void setBeanFactory(AutowireCapableBeanFactory beanFactory) {
-        this.beanFactory = beanFactory;
-    }
 }
