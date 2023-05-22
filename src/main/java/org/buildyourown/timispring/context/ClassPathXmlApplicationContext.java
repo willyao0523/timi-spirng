@@ -1,59 +1,89 @@
 package org.buildyourown.timispring.context;
 
-import org.buildyourown.timispring.beans.BeanDefinition;
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.Element;
-import org.dom4j.io.SAXReader;
+import org.buildyourown.timispring.beans.*;
+import org.buildyourown.timispring.beans.factory.BeanFactory;
+import org.buildyourown.timispring.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
+import org.buildyourown.timispring.beans.factory.config.AutowireCapableBeanFactory;
+import org.buildyourown.timispring.beans.factory.config.BeanFactoryPostProcessor;
+import org.buildyourown.timispring.beans.factory.config.ConfigurableListableBeanFactory;
+import org.buildyourown.timispring.beans.factory.support.DefaultListableBeanFactory;
+import org.buildyourown.timispring.beans.factory.xml.XmlBeanDefinitionReader;
+import org.buildyourown.timispring.core.ClassPathXmlResource;
+import org.buildyourown.timispring.core.Resource;
 
-import javax.swing.event.DocumentEvent;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-public class ClassPathXmlApplicationContext {
-
-    private List<BeanDefinition> beanDefinitions = new ArrayList<>();
-    private Map<String, Object> singletons = new HashMap<>();
+public class ClassPathXmlApplicationContext extends AbstractApplicationContext {
+    DefaultListableBeanFactory beanFactory;
+    private final List<BeanFactoryPostProcessor> beanFactoryPostProcessors = new ArrayList<>();
 
     public ClassPathXmlApplicationContext(String filename) {
-        this.readXml(filename);
-        this.instanceBeans();
+        this(filename, true);
     }
 
-    private void readXml(String filename) {
-        SAXReader saxReader = new SAXReader();
-        try {
-            URL xmlPath = this.getClass().getClassLoader().getResource(filename);
-            Document document = saxReader.read(xmlPath);
-            Element rootElement = document.getRootElement();
-            for (Element element : (List<Element>) rootElement.elements()) {
-                String beanId = element.attributeValue("id");
-                String beanClassName = element.attributeValue("class");
-                BeanDefinition beanDefinition = new BeanDefinition(beanId, beanClassName);
-                beanDefinitions.add(beanDefinition);
-            }
-        } catch (DocumentException e) {
-            throw new RuntimeException(e);
-        }
-    }
+    public ClassPathXmlApplicationContext(String filename, boolean isRefresh) {
+        Resource resource = new ClassPathXmlResource(filename);
+        DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+        XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
+        reader.loadBeanDefinitions(resource);
+        this.beanFactory = beanFactory;
 
-    private void instanceBeans() {
-        for (BeanDefinition beanDefinition : beanDefinitions) {
+        if (isRefresh) {
             try {
-                singletons.put(
-                        beanDefinition.getId(),
-                        Class.forName(beanDefinition.getClassName()).newInstance()
-                );
-            } catch (Exception e) {
+                refresh();
+            } catch (IllegalStateException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    public Object getBean(String beanName) {
-        return singletons.get(beanName);
+    @Override
+    void registerListeners() {
+        ApplicationListener listener = new ApplicationListener();
+        this.getApplicationEventPublisher().addApplicationListener(listener);
+    }
+
+    @Override
+    void initApplicationEventPublisher() {
+        ApplicationEventPublisher aep = new SimpleApplicationEventPublisher();
+        this.setApplicationEventPublisher(aep);
+    }
+
+    @Override
+    void postProcessBeanFactory(ConfigurableListableBeanFactory bf) {
+    }
+
+    @Override
+    void registerBeanPostProcessors(ConfigurableListableBeanFactory bf) {
+        this.beanFactory.addBeanPostProcessor(new AutowiredAnnotationBeanPostProcessor());
+    }
+
+    @Override
+    void onRefresh() {
+        this.beanFactory.refresh();
+    }
+
+    @Override
+    public ConfigurableListableBeanFactory getBeanFactory() throws IllegalStateException {
+        return this.beanFactory;
+    }
+
+    @Override
+    public void addApplicationListener(ApplicationListener listener) {
+        this.getApplicationEventPublisher().addApplicationListener(listener);
+
+    }
+
+    @Override
+    void finishRefresh() {
+        publishEvent(new ContextRefreshEvent("Context Refreshed..."));
+
+    }
+
+    @Override
+    public void publishEvent(ApplicationEvent event) {
+        this.getApplicationEventPublisher().publishEvent(event);
+
     }
 }
